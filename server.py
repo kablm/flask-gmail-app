@@ -1,49 +1,40 @@
-# server_complete.py
+# server_env.py
 import os
-import json
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, send_from_directory, jsonify
 from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
-
-# -----------------------------
-# Configuration
-# -----------------------------
-APP_PORT = 8766
-SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
-CREDENTIALS_FILE = 'credentials.json'  # Client ID / secret téléchargé depuis Google Cloud
-TOKEN_FILE = 'token.json'
 
 app = Flask(__name__, static_folder='.')
 
 # -----------------------------
-# Fonction pour obtenir des credentials
+# Récupérer les secrets depuis les variables d'environnement
 # -----------------------------
-def get_credentials():
-    creds = None
-    # Si token existe déjà, on le charge
-    if os.path.exists(TOKEN_FILE):
-        creds = Credentials.from_authorized_user_file(TOKEN_FILE, SCOPES)
+CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
+CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
+REFRESH_TOKEN = os.environ.get("GMAIL_REFRESH_TOKEN")
 
-    # Sinon, on lance OAuth pour créer le token
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(CREDENTIALS_FILE, SCOPES)
-            creds = flow.run_local_server(port=APP_PORT)  # ✅ même port que Flask
-        # Sauvegarde du token
-        with open(TOKEN_FILE, 'w') as token:
-            token.write(creds.to_json())
-    return creds
+SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
+
+# Vérification rapide des variables d'environnement
+if not all([CLIENT_ID, CLIENT_SECRET, REFRESH_TOKEN]):
+    raise Exception("⚠️ Une ou plusieurs variables d'environnement sont manquantes !")
 
 # -----------------------------
-# Endpoint pour récupérer les emails
+# Endpoint pour récupérer Gmail
 # -----------------------------
 @app.route('/fetch_gmail')
 def fetch_gmail():
     try:
-        creds = get_credentials()
+        # Créer les credentials depuis les variables d'environnement
+        creds = Credentials(
+            token=None,
+            refresh_token=REFRESH_TOKEN,
+            client_id=CLIENT_ID,
+            client_secret=CLIENT_SECRET,
+            token_uri="https://oauth2.googleapis.com/token",
+            scopes=SCOPES
+        )
+
         service = build('gmail', 'v1', credentials=creds)
 
         # Récupère les 20 derniers emails
@@ -66,11 +57,12 @@ def fetch_gmail():
             })
 
         return jsonify({"emails": emails})
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 # -----------------------------
-# Servir le front-end (index.html ou autre)
+# Servir le front-end
 # -----------------------------
 @app.route('/')
 @app.route('/<path:path>')
@@ -81,5 +73,5 @@ def serve(path='index.html'):
 # Lancer le serveur
 # -----------------------------
 if __name__ == '__main__':
-    print(f"🚀 Serveur démarré sur http://127.0.0.1:{APP_PORT}")
-    app.run(host='127.0.0.1', port=APP_PORT, debug=True)
+    port = int(os.environ.get("PORT", 8765))  # Render fournit la variable PORT
+    app.run(host='0.0.0.0', port=port, debug=True)
