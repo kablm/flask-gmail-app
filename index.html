@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alternance Bot – Kader BELEM</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f4f8;color:#1a1a2e;display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{width:220px;min-height:100vh;background:#1a3a5c;color:#fff;display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100}
+.sidebar-logo{padding:24px 20px 16px;border-bottom:1px solid rgba(255,255,255,.15)}
+.sidebar-logo h2{font-size:15px;font-weight:700}
+.sidebar-logo p{font-size:11px;opacity:.6;margin-top:3px}
+nav{flex:1;padding:8px 0}
+.nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;cursor:pointer;font-size:13px;border-left:3px solid transparent;transition:background .15s}
+.nav-item:hover{background:rgba(255,255,255,.1)}
+.nav-item.active{background:rgba(255,255,255,.15);border-left-color:#64b5f6}
+.nav-badge{margin-left:auto;background:#e53935;color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;display:none}
+.sidebar-foot{padding:14px 20px;font-size:11px;opacity:.4;border-top:1px solid rgba(255,255,255,.1)}
+
+/* MAIN */
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:#fff;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #dde3ec;position:sticky;top:0;z-index:50}
+.topbar h1{font-size:17px;font-weight:700;color:#1a3a5c}
+.topbar-actions{display:flex;gap:8px;flex-wrap:wrap}
+.content{padding:24px;flex:1}
+
+/* PAGES */
+.page{display:none}.page.active{display:block}
+
+/* STAT CARDS */
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.card{background:#fff;border-radius:10px;padding:18px;border:1px solid #dde3ec}
+.card .lbl{font-size:11px;color:#7a8799;font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
+.card .val{font-size:30px;font-weight:800;color:#1a3a5c}
+.card .sub{font-size:11px;color:#aab;margin-top:4px}
+.card.green .val{color:#2e7d32}.card.orange .val{color:#e65100}.card.red .val{color:#c62828}
+
+/* SECTION */
+.section{background:#fff;border-radius:10px;border:1px solid #dde3ec;margin-bottom:20px;overflow:hidden}
+.sec-head{padding:14px 18px;border-bottom:1px solid #dde3ec;display:flex;align-items:center;justify-content:space-between}
+.sec-head h3{font-size:13px;font-weight:700}
+.sec-body{padding:18px}
+
+/* PROGRESS */
+.prog-bar{background:#e8edf2;border-radius:6px;height:8px;overflow:hidden;margin-top:8px}
+.prog-fill{background:linear-gradient(90deg,#1976d2,#42a5f5);height:100%;border-radius:6px;transition:width .5s}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{padding:9px 12px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#7a8799;border-bottom:2px solid #edf0f4;background:#f8fafc}
+td{padding:11px 12px;border-bottom:1px solid #edf0f4;vertical-align:middle}
+tr:hover td{background:#f8fafc}
+
+/* BADGES */
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.b-sent{background:#e3f2fd;color:#1565c0}
+.b-ok{background:#e8f5e9;color:#2e7d32}
+.b-no{background:#fce4ec;color:#c62828}
+.b-wait{background:#fff8e1;color:#e65100}
+.b-relance{background:#f3e5f5;color:#6a1b9a}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:7px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:opacity .15s,transform .1s}
+.btn:hover{opacity:.85}.btn:active{transform:scale(.97)}
+.btn-primary{background:#1976d2;color:#fff}
+.btn-success{background:#2e7d32;color:#fff}
+.btn-warning{background:#e65100;color:#fff}
+.btn-danger{background:#c62828;color:#fff}
+.btn-outline{background:#fff;color:#1a3a5c;border:1.5px solid #dde3ec}
+.btn-sm{padding:5px 10px;font-size:12px}
+
+/* ALERTS */
+.alert{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-radius:8px;font-size:13px;margin-bottom:16px}
+.alert-info{background:#e3f2fd;border-left:3px solid #1976d2}
+.alert-warn{background:#fff3e0;border-left:3px solid #e65100}
+.alert-ok{background:#e8f5e9;border-left:3px solid #2e7d32}
+
+/* FORMS */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group label{font-size:12px;font-weight:600;color:#4a5568}
+.form-group input,.form-group select,.form-group textarea{padding:8px 11px;border:1.5px solid #dde3ec;border-radius:7px;font-size:13px;font-family:inherit;transition:border .2s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:#1976d2}
+
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:12px;padding:24px;width:560px;max-width:95vw;max-height:90vh;overflow-y:auto}
+.modal h3{font-size:15px;font-weight:700;margin-bottom:18px;color:#1a3a5c}
+.modal-foot{display:flex;justify-content:flex-end;gap:10px;margin-top:18px;border-top:1px solid #edf0f4;padding-top:14px}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:40px 20px;color:#aab}
+.empty-icon{font-size:40px;margin-bottom:12px}
+
+/* TERMINAL (finder log) */
+.terminal{background:#0d1117;color:#c9d1d9;font-family:'Consolas','Courier New',monospace;font-size:12px;padding:16px;border-radius:0 0 10px 10px;min-height:180px;max-height:400px;overflow-y:auto;white-space:pre-wrap;line-height:1.8}
+
+/* CONFIG BLOCK */
+.cfg-block{background:#f8fafc;border:1px solid #dde3ec;border-radius:7px;padding:12px 16px;font-family:'Consolas','Courier New',monospace;font-size:12px;margin-bottom:10px;line-height:1.9}
+
+@media(max-width:900px){.cards{grid-template-columns:1fr 1fr}.topbar-actions{display:none}}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <h2>🎯 Alternance Bot</h2>
+    <p>Kader BELEM — BTS CIEL</p>
+  </div>
+  <nav>
+    <div class="nav-item active" onclick="show('dashboard')">📊 Tableau de bord</div>
+    <div class="nav-item" onclick="show('companies')">🏢 Entreprises</div>
+    <div class="nav-item" onclick="show('candidatures')">📨 Candidatures</div>
+    <div class="nav-item" onclick="show('relances')">
+      🔔 Relances
+      <span class="nav-badge" id="badge-relances"></span>
+    </div>
+    <div class="nav-item" onclick="show('finder')">🔎 Chercher emails</div>
+    <div class="nav-item" onclick="show('config')">⚙️ Configuration</div>
+    <div class="nav-item" onclick="show('guide')">📖 Guide</div>
+  </nav>
+  <div class="sidebar-foot">BTS CIEL 2025–2026<br>Alternance Sept. 2026</div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <h1 id="page-title">📊 Tableau de bord</h1>
+    <div class="topbar-actions">
+      <button class="btn btn-outline btn-sm" onclick="doSyncJSON()">🔄 Sync JSON</button>
+      <button class="btn btn-outline btn-sm" onclick="triggerFile('file-json')">📂 Importer JSON</button>
+      <input type="file" id="file-json" accept=".json" style="display:none" onchange="doImportJSON(this)">
+      <button class="btn btn-outline btn-sm" onclick="doExport()">⬇️ Exporter</button>
+      <button class="btn btn-danger btn-sm" onclick="doReset()">🗑️ Reset</button>
+      <button class="btn btn-primary btn-sm" onclick="openAddModal()">+ Entreprise</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div id="page-dashboard" class="page active">
+      <div class="cards">
+        <div class="card"><div class="lbl">Entreprises</div><div class="val" id="s-total">0</div><div class="sub">dans la liste</div></div>
+        <div class="card green"><div class="lbl">Envoyées</div><div class="val" id="s-sent">0</div><div class="sub">candidatures</div></div>
+        <div class="card orange"><div class="lbl">Réponses</div><div class="val" id="s-replies">0</div><div class="sub" id="s-rate">taux : –</div></div>
+        <div class="card red"><div class="lbl">À relancer</div><div class="val" id="s-relances">0</div><div class="sub">aujourd'hui</div></div>
+      </div>
+      <div class="section">
+        <div class="sec-head"><h3>📈 Progression</h3><span id="s-pct" style="font-size:12px;color:#aab">0%</span></div>
+        <div class="sec-body">
+          <div style="font-size:12px;color:#7a8799;margin-bottom:6px" id="s-prog-lbl">0 / 0 entreprises contactées</div>
+          <div class="prog-bar"><div class="prog-fill" id="s-prog-fill" style="width:0%"></div></div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="sec-head"><h3>🕐 Dernières activités</h3><button class="btn btn-outline btn-sm" onclick="show('candidatures')">Voir tout</button></div>
+        <div class="sec-body" id="recent-list"><div class="empty"><div class="empty-icon">📭</div><p>Aucune candidature encore.</p></div></div>
+      </div>
+    </div>
+
+    <!-- ENTREPRISES -->
+    <div id="page-companies" class="page">
+      <div class="alert alert-info">💡 <div>Importez votre CSV ou ajoutez des entreprises manuellement. Le statut "Contactée" se met à jour automatiquement après sync du JSON.</div></div>
+      <div class="section">
+        <div class="sec-head">
+          <h3>🏢 Liste des entreprises (<span id="companies-count">0</span>)</h3>
+          <div style="display:flex;gap:8px">
+            <input id="search-co" type="text" placeholder="Rechercher…" style="width:180px;padding:6px 10px;font-size:12px;border:1.5px solid #dde3ec;border-radius:7px" oninput="renderCompanies()">
+            <button class="btn btn-outline btn-sm" onclick="triggerFile('file-csv')">📁 Importer CSV</button>
+            <input type="file" id="file-csv" accept=".csv" style="display:none" onchange="doImportCSV(this)">
+            <button class="btn btn-primary btn-sm" onclick="openAddModal()">+ Ajouter</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>Entreprise</th><th>Email</th><th>Ville</th><th>Secteur</th><th>Statut</th><th>Actions</th></tr></thead>
+            <tbody id="companies-tbody"></tbody>
+          </table>
+          <div id="companies-empty" class="empty" style="display:none"><div class="empty-icon">🏢</div><p>Aucune entreprise.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CANDIDATURES -->
+    <div id="page-candidatures" class="page">
+      <div class="section">
+        <div class="sec-head">
+          <h3>📨 Suivi des candidatures</h3>
+          <select id="filter-statut" onchange="renderCandidatures()" style="padding:6px 10px;font-size:12px;border:1.5px solid #dde3ec;border-radius:7px">
+            <option value="">Tous</option>
+            <option value="envoyé">Envoyées</option>
+            <option value="réponse positive">Réponse positive</option>
+            <option value="réponse négative">Réponse négative</option>
+            <option value="entretien prévu">Entretien prévu</option>
+            <option value="erreur">Erreurs</option>
+          </select>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>Date</th><th>Entreprise</th><th>Email</th><th>Statut</th><th>Notes</th><th>Relance</th><th>✏️</th></tr></thead>
+            <tbody id="cand-tbody"></tbody>
+          </table>
+          <div id="cand-empty" class="empty" style="display:none"><div class="empty-icon">📭</div><p>Aucune candidature.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RELANCES -->
+    <div id="page-relances" class="page">
+      <div class="alert alert-warn">🔔 <div>Relancez les entreprises sans réponse après <strong>14 jours</strong>.</div></div>
+      <div class="section">
+        <div class="sec-head"><h3>🔔 À relancer</h3></div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>Entreprise</th><th>Email</th><th>Envoyée</th><th>Relance</th><th>Jours</th><th>Actions</th></tr></thead>
+            <tbody id="relance-tbody"></tbody>
+          </table>
+          <div id="relance-empty" class="empty" style="display:none"><div class="empty-icon">✅</div><p>Aucune relance à faire !</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FINDER -->
+    <div id="page-finder" class="page">
+      <div class="alert alert-warn" id="finder-warn" style="display:none">⚠️ <div>Serveur non démarré. Lance <code>python server.py</code> dans ton dossier ALT.</div></div>
+      <div class="alert alert-ok" id="finder-ok" style="display:none">✅ <div>Serveur connecté.</div></div>
+      <div class="section">
+        <div class="sec-head"><h3>🔎 Recherche automatique d'emails</h3></div>
+        <div class="sec-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Fichier CSV</label>
+              <input type="text" id="finder-csv" value="entreprises_alternance_it.csv">
+            </div>
+            <div class="form-group">
+              <label>Clé Hunter.io (optionnel)</label>
+              <input type="text" id="finder-key" placeholder="fe660abe...">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nombre max</label>
+              <input type="number" id="finder-limit" value="20" min="1" max="200">
+            </div>
+            <div class="form-group" style="justify-content:flex-end;padding-top:20px">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                <input type="checkbox" id="finder-improve"> Améliorer les emails génériques (info@, contact@…)
+              </label>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:4px">
+            <button class="btn btn-primary" id="finder-btn" onclick="runFinder()">🔎 Lancer</button>
+            <button class="btn btn-outline" onclick="document.getElementById('finder-log').innerHTML='';document.getElementById('finder-stats').style.display='none'">🗑️ Effacer</button>
+            <button class="btn btn-success" id="finder-import-btn" style="display:none" onclick="importFinderResults()">✅ Importer résultats</button>
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="sec-head"><h3>📋 Journal</h3><span id="finder-progress" style="font-size:12px;color:#aab"></span></div>
+        <div class="terminal" id="finder-log">En attente…</div>
+      </div>
+      <div class="cards" id="finder-stats" style="display:none;grid-template-columns:repeat(3,1fr)">
+        <div class="card green"><div class="lbl">Trouvés</div><div class="val" id="f-found">0</div></div>
+        <div class="card"><div class="lbl">Traités</div><div class="val" id="f-proc">0</div></div>
+        <div class="card orange"><div class="lbl">Introuvables</div><div class="val" id="f-miss">0</div></div>
+      </div>
+    </div>
+
+    <!-- CONFIG -->
+    <div id="page-config" class="page">
+      <div class="alert alert-warn">⚙️ <div>La configuration réelle (Gmail, mot de passe) se fait dans <code>sender.py</code>.</div></div>
+      <div class="section">
+        <div class="sec-head"><h3>📧 Paramètres</h3></div>
+        <div class="sec-body">
+          <div class="form-row">
+            <div class="form-group"><label>Adresse Gmail</label><input type="email" id="cfg-email" oninput="saveConfig()"></div>
+            <div class="form-group"><label>Délai entre envois (sec)</label><input type="number" id="cfg-delay" min="30" max="300" oninput="saveConfig()"></div>
+          </div>
+          <div class="form-group"><label>Chemin vers le CV</label><input type="text" id="cfg-cv" oninput="saveConfig()"></div>
+          <div class="form-group" style="margin-top:14px"><label>Template email</label><textarea id="cfg-tpl" rows="16" oninput="saveConfig()"></textarea></div>
+          <div style="margin-top:10px;display:flex;gap:8px">
+            <button class="btn btn-primary" onclick="saveConfig();alert('Sauvegardé !')">💾 Sauvegarder</button>
+            <button class="btn btn-outline" onclick="previewTpl()">👁️ Aperçu</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GUIDE -->
+    <div id="page-guide" class="page">
+      <div class="section">
+        <div class="sec-head"><h3>📖 Guide d'utilisation</h3></div>
+        <div class="sec-body" style="line-height:1.9;font-size:13px">
+          <h4 style="color:#1a3a5c;margin-bottom:10px">🔧 Installation</h4>
+          <div class="cfg-block">pip install pandas openpyxl requests beautifulsoup4</div>
+          <h4 style="color:#1a3a5c;margin:18px 0 10px">📤 Envoyer des candidatures</h4>
+          <div class="cfg-block">python sender.py test entreprises_alternance_it.csv<br>python sender.py send entreprises_alternance_it.csv 10<br>python sender.py stats<br>python sender.py relances</div>
+          <h4 style="color:#1a3a5c;margin:18px 0 10px">🔎 Trouver des emails manquants</h4>
+          <div class="cfg-block">python email_finder.py entreprises_alternance_it.csv --limit 20<br>python email_finder.py entreprises_alternance_it.csv --improve --limit 20<br>python email_finder.py entreprises_alternance_it.csv --hunter-key CLE --limit 20</div>
+          <h4 style="color:#1a3a5c;margin:18px 0 10px">🌐 Interface web avec serveur</h4>
+          <div class="cfg-block">python server.py<br><span style="color:#58a6ff">→ Ouvre http://localhost:8765/index.html</span></div>
+          <div class="alert alert-warn" style="margin-top:16px">⚠️ <div>Maximum <strong>10–15 emails par jour</strong> pour éviter le blocage Gmail.</div></div>
+          <h4 style="color:#1a3a5c;margin:18px 0 10px">📁 Structure des fichiers</h4>
+          <div class="cfg-block">ALT/<br>├── sender.py<br>├── email_finder.py<br>├── server.py<br>├── entreprises_alternance_it.csv<br>├── candidatures.json<br>├── index.html<br>└── CV_Kader_Belem.pdf</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- MODAL AJOUTER ENTREPRISE -->
+<div class="modal-bg" id="modal-add">
+  <div class="modal">
+    <h3>🏢 Ajouter / Modifier une entreprise</h3>
+    <input type="hidden" id="edit-idx" value="-1">
+    <div class="form-row">
+      <div class="form-group"><label>Nom *</label><input type="text" id="add-nom" placeholder="Sopra Steria"></div>
+      <div class="form-group"><label>Email *</label><input type="email" id="add-email" placeholder="recrutement@entreprise.fr"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Ville</label><input type="text" id="add-ville" placeholder="Nantes"></div>
+      <div class="form-group"><label>Secteur</label><input type="text" id="add-secteur" placeholder="ESN / Cloud / IT…"></div>
+    </div>
+    <div class="form-group"><label>Pourquoi cette entreprise ?</label><textarea id="add-raison" rows="3" placeholder="votre expertise en cybersécurité…"></textarea></div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('modal-add')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveCompany()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL METTRE À JOUR CANDIDATURE -->
+<div class="modal-bg" id="modal-update">
+  <div class="modal">
+    <h3>✏️ Mettre à jour</h3>
+    <input type="hidden" id="upd-id">
+    <div class="form-group"><label>Statut</label>
+      <select id="upd-statut">
+        <option value="envoyé">Envoyée</option>
+        <option value="réponse positive">Réponse positive 🎉</option>
+        <option value="réponse négative">Réponse négative</option>
+        <option value="entretien prévu">Entretien prévu 📅</option>
+        <option value="relancée">Relancée</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin-top:12px"><label>Notes / Réponse reçue</label><textarea id="upd-notes" rows="4"></textarea></div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('modal-update')">Annuler</button>
+      <button class="btn btn-success" onclick="saveUpdate()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  DONNÉES PAR DÉFAUT
+// ═══════════════════════════════════════════════════════
+const DEFAULT_COMPANIES = [
+  {nom:"Sopra Steria Nantes",email:"recrutement.nantes@soprasteria.com",ville:"Saint-Herblain",secteur:"ESN / Conseil IT",raison_specifique:"votre position de leader français dans les services numériques"},
+  {nom:"Capgemini Nantes",email:"recrutement.ouest@capgemini.com",ville:"Nantes",secteur:"ESN / Transformation digitale",raison_specifique:"votre expertise en transformation digitale"},
+  {nom:"Devoteam Nantes",email:"careers.nantes@devoteam.com",ville:"Nantes",secteur:"Cloud et Cybersécurité",raison_specifique:"votre spécialisation dans le cloud et la cybersécurité"},
+  {nom:"Zenika Nantes",email:"nantes@zenika.com",ville:"Nantes",secteur:"DevOps et Cloud",raison_specifique:"votre culture axée sur le partage de connaissances"},
+  {nom:"Astek Nantes",email:"nantes@astekgroup.com",ville:"Nantes",secteur:"Ingénierie IT",raison_specifique:"vos missions variées en systèmes et réseaux"},
+  {nom:"Infotel Nantes",email:"recrutement@infotel.com",ville:"Saint-Herblain",secteur:"ESN",raison_specifique:"votre réputation dans l'accompagnement des alternants"},
+  {nom:"ITS Group Nantes",email:"recrutement@its-group.com",ville:"Nantes",secteur:"Solutions IT PME",raison_specifique:"votre accompagnement des entreprises locales"},
+  {nom:"Acensi Nantes",email:"recrutement.nantes@acensi.fr",ville:"Nantes",secteur:"Conseil IT",raison_specifique:"votre expertise en conseil IT en Pays de la Loire"},
+  {nom:"CGI Carquefou",email:"recrutement.ouest@cgi.com",ville:"Carquefou",secteur:"ESN Internationale",raison_specifique:"votre envergure internationale et vos projets grands comptes"},
+  {nom:"Hardis Group Nantes",email:"recrutement@hardis-group.com",ville:"Nantes",secteur:"Editeur / ESN",raison_specifique:"votre double casquette éditeur-ESN"},
+  {nom:"CHU de Nantes",email:"recrutement.dsi@chu-nantes.fr",ville:"Nantes",secteur:"Santé / SIH",raison_specifique:"les enjeux critiques de disponibilité et sécurité des systèmes hospitaliers"},
+  {nom:"SNCF Réseau Nantes",email:"recrutement.nantes@sncf-reseau.fr",ville:"Nantes",secteur:"Transport",raison_specifique:"vos infrastructures IT critiques"},
+  {nom:"Nantes Métropole DSI",email:"dsi.recrutement@nantesmetropole.fr",ville:"Nantes",secteur:"Collectivité / Smart City",raison_specifique:"vos projets smart city et modernisation des services publics"},
+  {nom:"Ville de Nantes DSI",email:"recrutement.dsi@mairie-nantes.fr",ville:"Nantes",secteur:"Collectivité",raison_specifique:"vos défis en cybersécurité et administration système"},
+  {nom:"Dawan Angers",email:"recrutement@dawan.fr",ville:"Angers",secteur:"Formation / ESN",raison_specifique:"votre double activité formation-ESN"},
+  {nom:"Région Pays de la Loire",email:"recrutement.dsi@paysdelaloire.fr",ville:"Nantes",secteur:"Collectivité Régionale",raison_specifique:"vos projets d'infrastructure régionale"},
+  {nom:"Agap2 Nantes",email:"nantes@agap2.com",ville:"Nantes",secteur:"Ingénierie IT",raison_specifique:"vos missions diversifiées chez vos clients"},
+  {nom:"Helpline Nantes",email:"carole.malherbe@helpline.fr",ville:"Nantes",secteur:"Support IT",raison_specifique:"votre expertise en support utilisateurs et infrastructure"},
+  {nom:"Inetum La Chapelle",email:"christophe.guilbaud@inetum.com",ville:"La Chapelle sur Erdre",secteur:"ESN",raison_specifique:"votre présence locale et votre expertise en services numériques"},
+  {nom:"SBS Informatique",email:"christophe.socheleau@groupe-sbs.fr",ville:"Nantes",secteur:"Informatique / IT",raison_specifique:"votre accompagnement des PME locales en infrastructure IT"}
+];
+
+const DEFAULT_TEMPLATE = `Madame, Monsieur,
+
+Actuellement en BTS CIEL (Cybersécurité, Informatique et Réseaux, Électronique) au Lycée de l'Hyrôme, je me permets de vous adresser ma candidature spontanée pour un poste de Technicien Systèmes et Réseaux en alternance au sein de {nom}, pour la rentrée de septembre 2026.
+
+Cette réorientation vers les réseaux et systèmes n'est pas le fruit d'un hasard : après deux années en développement logiciel (BTS SIO option SLAM), j'ai découvert ma véritable passion lors de mes stages en infrastructure IT. Cette double compétence dev/infra constitue aujourd'hui un atout concret.
+
+Ce qui m'attire particulièrement chez {nom} : {raison_specifique}.
+
+Mes 6 stages m'ont permis d'acquérir une expérience concrète en :
+• Administration système : Windows Server 2019/2022, Active Directory, GPO, Ubuntu Server
+• Réseaux : architecture LAN, DHCP, DNS, firewalling, câblage
+• Outils : VMware, VirtualBox, Docker, GLPI
+• Développement : Python, SQL, PHP, Git
+
+Titulaire du permis B et véhiculé, je suis disponible pour des interventions sur site.
+Mon portfolio : https://kablm.github.io/portfolio-kader
+
+Dans l'attente de votre réponse, veuillez agréer, Madame, Monsieur, l'expression de mes salutations les plus respectueuses.
+
+Kader BELEM
+06 61 40 29 98 | Kaderbelem428@gmail.com`;
+
+// ═══════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════
+var S = { companies: [], candidatures: [], config: {} };
+
+function loadState() {
+  try {
+    var raw = localStorage.getItem('alt_bot_v2');
+    if (raw) {
+      var parsed = JSON.parse(raw);
+      S = parsed;
+    }
+  } catch(e) {}
+  if (!Array.isArray(S.companies))    S.companies    = JSON.parse(JSON.stringify(DEFAULT_COMPANIES));
+  if (!Array.isArray(S.candidatures)) S.candidatures = [];
+  if (typeof S.config !== 'object' || !S.config) S.config = {};
+  if (!S.config.template) S.config.template = DEFAULT_TEMPLATE;
+  if (!S.config.email)    S.config.email    = 'Kaderbelem428@gmail.com';
+  if (!S.config.delay)    S.config.delay    = 60;
+  if (!S.config.cv)       S.config.cv       = 'CV_Kader_Belem.pdf';
+}
+
+function save() {
+  try { localStorage.setItem('alt_bot_v2', JSON.stringify(S)); } catch(e) {}
+}
+
+// ═══════════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════════
+var PAGES = ['dashboard','companies','candidatures','relances','finder','config','guide'];
+var TITLES = {
+  dashboard:'📊 Tableau de bord', companies:'🏢 Entreprises',
+  candidatures:'📨 Candidatures', relances:'🔔 Relances',
+  finder:'🔎 Chercher emails', config:'⚙️ Configuration', guide:'📖 Guide'
+};
+
+function show(name) {
+  PAGES.forEach(function(p) {
+    var pg = document.getElementById('page-' + p);
+    if (pg) pg.classList.remove('active');
+  });
+  var nav = document.querySelectorAll('.nav-item');
+  nav.forEach(function(n) { n.classList.remove('active'); });
+  var el = document.getElementById('page-' + name);
+  if (el) el.classList.add('active');
+  var idx = PAGES.indexOf(name);
+  if (nav[idx]) nav[idx].classList.add('active');
+  document.getElementById('page-title').textContent = TITLES[name] || name;
+  if (name === 'companies')    renderCompanies();
+  if (name === 'candidatures') renderCandidatures();
+  if (name === 'relances')     renderRelances();
+  if (name === 'dashboard')    renderDashboard();
+  if (name === 'config')       loadConfig();
+  if (name === 'finder')       checkServer();
+}
+
+// ═══════════════════════════════════════════════════════
+//  DASHBOARD
+// ═══════════════════════════════════════════════════════
+function renderDashboard() {
+  var sent     = S.candidatures.filter(function(c){ return c.statut !== 'erreur'; }).length;
+  var replies  = S.candidatures.filter(function(c){ return c.reponse; }).length;
+  var relances = getRelances().length;
+  document.getElementById('s-total').textContent   = S.companies.length;
+  document.getElementById('s-sent').textContent    = sent;
+  document.getElementById('s-replies').textContent = replies;
+  document.getElementById('s-relances').textContent= relances;
+  document.getElementById('s-rate').textContent    = sent ? 'taux : ' + Math.round(replies/sent*100) + '%' : 'taux : –';
+  var pct = S.companies.length ? Math.round(sent/S.companies.length*100) : 0;
+  document.getElementById('s-pct').textContent     = pct + '%';
+  document.getElementById('s-prog-fill').style.width = pct + '%';
+  document.getElementById('s-prog-lbl').textContent  = sent + ' / ' + S.companies.length + ' entreprises contactées';
+  var badge = document.getElementById('badge-relances');
+  if (relances > 0) { badge.textContent = relances; badge.style.display = ''; }
+  else badge.style.display = 'none';
+
+  var recent = S.candidatures.slice().reverse().slice(0, 5);
+  var el = document.getElementById('recent-list');
+  if (!recent.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">📭</div><p>Aucune candidature.</p></div>'; return; }
+  el.innerHTML = '<table style="font-size:13px"><thead><tr><th>Date</th><th>Entreprise</th><th>Statut</th></tr></thead><tbody>' +
+    recent.map(function(c){ return '<tr><td>' + c.date_envoi + '</td><td>' + c.entreprise + '</td><td>' + badge_(c.statut) + '</td></tr>'; }).join('') +
+    '</tbody></table>';
+}
+
+// ═══════════════════════════════════════════════════════
+//  ENTREPRISES
+// ═══════════════════════════════════════════════════════
+function renderCompanies() {
+  var q = (document.getElementById('search-co').value || '').toLowerCase();
+  var list = S.companies.filter(function(c){
+    return !q || c.nom.toLowerCase().includes(q) || (c.ville||'').toLowerCase().includes(q) || (c.secteur||'').toLowerCase().includes(q);
+  });
+  document.getElementById('companies-count').textContent = list.length;
+  var sentEmails = {};
+  S.candidatures.filter(function(c){ return c.statut !== 'erreur'; }).forEach(function(c){ sentEmails[c.email] = true; });
+  var tbody = document.getElementById('companies-tbody');
+  var empty = document.getElementById('companies-empty');
+  if (!list.length) { tbody.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+  tbody.innerHTML = list.map(function(c, i) {
+    var realIdx = S.companies.indexOf(c);
+    var statut  = sentEmails[c.email] ? '<span class="badge b-sent">Contactée</span>' : '<span class="badge b-wait">En attente</span>';
+    return '<tr><td><strong>' + esc(c.nom) + '</strong></td>' +
+      '<td style="font-size:12px;color:#7a8799">' + esc(c.email) + '</td>' +
+      '<td>' + esc(c.ville||'') + '</td>' +
+      '<td style="font-size:12px;color:#7a8799">' + esc(c.secteur||'') + '</td>' +
+      '<td>' + statut + '</td>' +
+      '<td><button class="btn btn-outline btn-sm" onclick="editCompany(' + realIdx + ')">✏️</button> ' +
+      '<button class="btn btn-danger btn-sm" onclick="delCompany(' + realIdx + ')">🗑️</button></td></tr>';
+  }).join('');
+}
+
+function openAddModal() {
+  document.getElementById('edit-idx').value = '-1';
+  document.getElementById('add-nom').value  = '';
+  document.getElementById('add-email').value= '';
+  document.getElementById('add-ville').value= '';
+  document.getElementById('add-secteur').value = '';
+  document.getElementById('add-raison').value  = '';
+  document.getElementById('modal-add').classList.add('open');
+}
+
+function editCompany(idx) {
+  var c = S.companies[idx];
+  document.getElementById('edit-idx').value       = idx;
+  document.getElementById('add-nom').value        = c.nom || '';
+  document.getElementById('add-email').value      = c.email || '';
+  document.getElementById('add-ville').value      = c.ville || '';
+  document.getElementById('add-secteur').value    = c.secteur || '';
+  document.getElementById('add-raison').value     = c.raison_specifique || '';
+  document.getElementById('modal-add').classList.add('open');
+}
+
+function saveCompany() {
+  var nom   = document.getElementById('add-nom').value.trim();
+  var email = document.getElementById('add-email').value.trim();
+  if (!nom || !email) { alert('Nom et email obligatoires.'); return; }
+  var obj = { nom: nom, email: email, ville: document.getElementById('add-ville').value.trim(),
+    secteur: document.getElementById('add-secteur').value.trim(), raison_specifique: document.getElementById('add-raison').value.trim() };
+  var idx = parseInt(document.getElementById('edit-idx').value);
+  if (idx >= 0) S.companies[idx] = obj;
+  else S.companies.push(obj);
+  save(); closeModal('modal-add'); renderCompanies(); renderDashboard();
+}
+
+function delCompany(idx) {
+  if (!confirm('Supprimer cette entreprise ?')) return;
+  S.companies.splice(idx, 1);
+  save(); renderCompanies(); renderDashboard();
+}
+
+// ═══════════════════════════════════════════════════════
+//  CANDIDATURES
+// ═══════════════════════════════════════════════════════
+function renderCandidatures() {
+  var filter = document.getElementById('filter-statut').value;
+  var list   = filter ? S.candidatures.filter(function(c){ return c.statut === filter; }) : S.candidatures;
+  var tbody  = document.getElementById('cand-tbody');
+  var empty  = document.getElementById('cand-empty');
+  if (!list.length) { tbody.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+  tbody.innerHTML = list.slice().reverse().map(function(c) {
+    return '<tr><td style="font-size:12px">' + esc(c.date_envoi||'') + '</td>' +
+      '<td><strong>' + esc(c.entreprise||'') + '</strong></td>' +
+      '<td style="font-size:11px;color:#7a8799">' + esc(c.email||'') + '</td>' +
+      '<td>' + badge_(c.statut) + '</td>' +
+      '<td style="font-size:12px">' + esc(c.notes||c.reponse||'–') + '</td>' +
+      '<td style="font-size:12px">' + esc(c.date_relance||'–') + '</td>' +
+      '<td><button class="btn btn-outline btn-sm" onclick="openUpdate(\'' + esc(c.id) + '\')">✏️</button></td></tr>';
+  }).join('');
+}
+
+function openUpdate(id) {
+  var c = S.candidatures.find(function(x){ return String(x.id) === String(id); });
+  if (!c) return;
+  document.getElementById('upd-id').value    = id;
+  document.getElementById('upd-statut').value= c.statut || 'envoyé';
+  document.getElementById('upd-notes').value = c.notes || c.reponse || '';
+  document.getElementById('modal-update').classList.add('open');
+}
+
+function saveUpdate() {
+  var id = document.getElementById('upd-id').value;
+  var c  = S.candidatures.find(function(x){ return String(x.id) === String(id); });
+  if (!c) return;
+  c.statut = document.getElementById('upd-statut').value;
+  c.notes  = document.getElementById('upd-notes').value;
+  if (c.statut.includes('réponse')) c.reponse = c.notes;
+  save(); closeModal('modal-update'); renderCandidatures(); renderRelances(); renderDashboard();
+}
+
+// ═══════════════════════════════════════════════════════
+//  RELANCES
+// ═══════════════════════════════════════════════════════
+function getRelances() {
+  var today = new Date().toISOString().split('T')[0];
+  return S.candidatures.filter(function(c){
+    return c.statut === 'envoyé' && !c.reponse && (c.date_relance || '9999') <= today;
+  });
+}
+
+function renderRelances() {
+  var list  = getRelances();
+  var tbody = document.getElementById('relance-tbody');
+  var empty = document.getElementById('relance-empty');
+  if (!list.length) { tbody.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+  tbody.innerHTML = list.map(function(c) {
+    var days = Math.floor((new Date() - new Date(c.date_envoi)) / 86400000);
+    return '<tr><td><strong>' + esc(c.entreprise) + '</strong></td>' +
+      '<td style="font-size:12px">' + esc(c.email) + '</td>' +
+      '<td style="font-size:12px">' + esc(c.date_envoi) + '</td>' +
+      '<td style="font-size:12px">' + esc(c.date_relance||'–') + '</td>' +
+      '<td style="' + (days > 14 ? 'color:#c62828;font-weight:700' : '') + '">' + days + 'j</td>' +
+      '<td><button class="btn btn-warning btn-sm" onclick="markRelanced(\'' + esc(c.id) + '\')">📧 Relancée</button></td></tr>';
+  }).join('');
+}
+
+function markRelanced(id) {
+  var c = S.candidatures.find(function(x){ return String(x.id) === String(id); });
+  if (!c) return;
+  c.statut = 'relancée';
+  c.date_relance = new Date(Date.now() + 14*86400000).toISOString().split('T')[0];
+  save(); renderRelances(); renderDashboard();
+}
+
+// ═══════════════════════════════════════════════════════
+//  IMPORT / EXPORT
+// ═══════════════════════════════════════════════════════
+function doSyncJSON() {
+  fetch('candidatures.json?' + Date.now())
+    .then(function(r){ if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function(data){ mergeJSON(data); })
+    .catch(function(){ triggerFile('file-json'); });
+}
+
+function doImportJSON(input) {
+  var file = input.files[0]; if (!file) return;
+  input.value = '';
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try { mergeJSON(JSON.parse(e.target.result)); }
+    catch(err) { alert('JSON invalide : ' + err.message); }
+  };
+  reader.readAsText(file);
+}
+
+function mergeJSON(data) {
+  var cands = data.candidatures || [];
+  if (!cands.length) { alert('JSON vide ou sans candidatures.'); return; }
+  var count = 0;
+  cands.forEach(function(nc) {
+    var ex = S.candidatures.find(function(c){ return String(c.id)===String(nc.id) || c.email===nc.email; });
+    if (ex) { ex.statut = nc.statut || ex.statut; ex.date_envoi = nc.date_envoi || ex.date_envoi; ex.date_relance = nc.date_relance || ex.date_relance; }
+    else { S.candidatures.push(nc); count++; }
+  });
+  save(); renderDashboard(); renderCandidatures(); renderRelances();
+  alert('Sync OK — ' + cands.length + ' candidatures traitées.');
+}
+
+function parseCSVLine(line) {
+  var result = [], cur = '', inQ = false;
+  for (var i = 0; i < line.length; i++) {
+    var ch = line[i];
+    if (ch === '"') { if (inQ && line[i+1]==='"') { cur+='"'; i++; } else inQ=!inQ; }
+    else if (ch === ',' && !inQ) { result.push(cur.trim()); cur=''; }
+    else cur += ch;
+  }
+  result.push(cur.trim());
+  return result;
+}
+
+function doImportCSV(input) {
+  var file = input.files[0]; if (!file) return;
+  input.value = '';
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var text  = e.target.result.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+      var lines = text.split('\n').filter(function(l){ return l.trim(); });
+      if (lines.length < 2) { alert('CSV vide.'); return; }
+      var headers = parseCSVLine(lines[0]).map(function(h){ return h.replace(/^"|"$/g,'').trim().toLowerCase(); });
+      var added = 0;
+      lines.slice(1).forEach(function(line) {
+        var vals = parseCSVLine(line);
+        var obj  = {};
+        headers.forEach(function(h,i){ obj[h] = (vals[i]||'').trim(); });
+        var nom   = obj['nom'] || obj['name'] || '';
+        var email = obj['email'] || obj['mail'] || '';
+        if (!nom || !email || !email.includes('@')) return;
+        if (S.companies.find(function(c){ return c.email.toLowerCase()===email.toLowerCase(); })) return;
+        S.companies.push({ nom: nom, email: email, ville: obj['ville']||obj['city']||'',
+          secteur: obj['secteur']||obj['sector']||'Informatique / IT',
+          raison_specifique: obj['raison_specifique']||obj['raison']||'' });
+        added++;
+      });
+      save(); renderCompanies(); renderDashboard();
+      alert(added + ' entreprises importées.');
+    } catch(err) { alert('Erreur CSV : ' + err.message); }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function doExport() {
+  var data = { companies: S.companies, candidatures: S.candidatures, exported: new Date().toISOString() };
+  var blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'alternance_kader_' + new Date().toISOString().split('T')[0] + '.json';
+  a.click();
+}
+
+function doReset() {
+  if (!confirm('Remettre TOUTES les données à zéro ? (irréversible)')) return;
+  localStorage.removeItem('alt_bot_v2');
+  S = { companies: JSON.parse(JSON.stringify(DEFAULT_COMPANIES)), candidatures: [], config: {} };
+  S.config = { email:'Kaderbelem428@gmail.com', delay:60, cv:'CV_Kader_Belem.pdf', template: DEFAULT_TEMPLATE };
+  save(); renderDashboard(); renderCompanies();
+  alert('Données réinitialisées.');
+}
+
+// ═══════════════════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════════════════
+function loadConfig() {
+  document.getElementById('cfg-email').value = S.config.email || '';
+  document.getElementById('cfg-delay').value = S.config.delay || 60;
+  document.getElementById('cfg-cv').value    = S.config.cv    || '';
+  document.getElementById('cfg-tpl').value   = S.config.template || DEFAULT_TEMPLATE;
+}
+function saveConfig() {
+  S.config.email    = document.getElementById('cfg-email').value;
+  S.config.delay    = parseInt(document.getElementById('cfg-delay').value) || 60;
+  S.config.cv       = document.getElementById('cfg-cv').value;
+  S.config.template = document.getElementById('cfg-tpl').value;
+  save();
+}
+function previewTpl() {
+  var tpl = document.getElementById('cfg-tpl').value;
+  alert(tpl.replace(/{nom}/g,'Sopra Steria').replace(/{raison_specifique}/g,'votre expertise en cloud').replace(/{secteur}/g,'ESN').replace(/{ville}/g,'Nantes'));
+}
+
+// ═══════════════════════════════════════════════════════
+//  EMAIL FINDER (via server.py)
+// ═══════════════════════════════════════════════════════
+var SERVER = 'http://localhost:8765';
+var finderRunning = false;
+var fStats = {found:0, proc:0};
+
+function checkServer() {
+  fetch(SERVER + '/api/status', {signal: AbortSignal.timeout ? AbortSignal.timeout(2000) : undefined})
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (d.ok) {
+        document.getElementById('finder-ok').style.display   = 'flex';
+        document.getElementById('finder-warn').style.display = 'none';
+      }
+    })
+    .catch(function(){
+      document.getElementById('finder-warn').style.display = 'flex';
+      document.getElementById('finder-ok').style.display   = 'none';
+    });
+}
+
+function logFinder(txt, color) {
+  var el = document.getElementById('finder-log');
+  if (el.textContent === 'En attente…') el.innerHTML = '';
+  var span = document.createElement('span');
+  span.style.color = color || '#c9d1d9';
+  span.textContent = txt;
+  el.appendChild(span);
+  el.appendChild(document.createTextNode('\n'));
+  el.scrollTop = el.scrollHeight;
+  if (txt.includes('Trouvé')) { fStats.found++; document.getElementById('f-found').textContent = fStats.found; }
+  if (txt.match(/^\[\d+\/\d+\]/)) { fStats.proc++; document.getElementById('f-proc').textContent = fStats.proc; document.getElementById('f-miss').textContent = fStats.proc - fStats.found; }
+}
+
+function runFinder() {
+  if (finderRunning) return;
+  var csv    = document.getElementById('finder-csv').value.trim();
+  var key    = document.getElementById('finder-key').value.trim();
+  var limit  = parseInt(document.getElementById('finder-limit').value) || 20;
+  var improve= document.getElementById('finder-improve').checked;
+
+  document.getElementById('finder-log').innerHTML = '';
+  document.getElementById('finder-stats').style.display = 'grid';
+  document.getElementById('finder-import-btn').style.display = 'none';
+  document.getElementById('finder-btn').textContent = '⏳ En cours…';
+  document.getElementById('finder-btn').disabled = true;
+  document.getElementById('finder-progress').textContent = 'Recherche…';
+  finderRunning = true; fStats = {found:0, proc:0};
+  document.getElementById('f-found').textContent = '0';
+  document.getElementById('f-proc').textContent  = '0';
+  document.getElementById('f-miss').textContent  = '0';
+
+  fetch(SERVER + '/api/find-emails', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({csv_file:csv, hunter_key:key, limit:limit, improve:improve})
+  }).then(function(resp) {
+    var reader = resp.body.getReader();
+    var dec    = new TextDecoder();
+    var buf    = '';
+    function read() {
+      reader.read().then(function(res) {
+        if (res.done) return;
+        buf += dec.decode(res.value, {stream:true});
+        var parts = buf.split('\n\n');
+        buf = parts.pop();
+        parts.forEach(function(ev) {
+          if (!ev.startsWith('data:')) return;
+          try {
+            var d = JSON.parse(ev.replace('data:','').trim());
+            if (d.line) {
+              var color = d.line.includes('Trouvé') ? '#3fb950' : d.line.includes('introuvable') ? '#f85149' : '#c9d1d9';
+              logFinder(d.line, color);
+            }
+            if (d.done) {
+              document.getElementById('finder-progress').textContent = 'Terminé — ' + fStats.found + ' emails trouvés';
+              document.getElementById('finder-import-btn').style.display = '';
+            }
+            if (d.error) logFinder('Erreur : ' + d.error, '#f85149');
+          } catch(e) {}
+        });
+        read();
+      });
+    }
+    read();
+  }).catch(function(err) {
+    logFinder('Erreur connexion — assure-toi que python server.py tourne.', '#f85149');
+  }).finally(function() {
+    finderRunning = false;
+    document.getElementById('finder-btn').textContent = '🔎 Lancer';
+    document.getElementById('finder-btn').disabled    = false;
+  });
+}
+
+function importFinderResults() {
+  fetch(SERVER + '/api/companies')
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      var updated = 0;
+      (data.companies || []).forEach(function(fresh) {
+        var ex = S.companies.find(function(c){ return c.nom === fresh.nom; });
+        if (ex && ex.email !== fresh.email && fresh.email) { ex.email = fresh.email; updated++; }
+        else if (!ex && fresh.email) { S.companies.push(fresh); updated++; }
+      });
+      save(); renderDashboard(); renderCompanies();
+      alert(updated + ' emails mis à jour !');
+      document.getElementById('finder-import-btn').style.display = 'none';
+    })
+    .catch(function(){ alert('Impossible de récupérer les données du serveur.'); });
+}
+
+// ═══════════════════════════════════════════════════════
+//  UTILITAIRES
+// ═══════════════════════════════════════════════════════
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function badge_(statut) {
+  var map = {'envoyé':'b-sent','réponse positive':'b-ok','réponse négative':'b-no','entretien prévu':'b-ok','erreur':'b-no','relancée':'b-relance'};
+  return '<span class="badge ' + (map[statut]||'b-wait') + '">' + esc(statut||'–') + '</span>';
+}
+
+function triggerFile(id) { document.getElementById(id).click(); }
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// Fermer modal en cliquant à l'extérieur
+document.querySelectorAll('.modal-bg').forEach(function(m) {
+  m.addEventListener('click', function(e) { if (e.target === m) m.classList.remove('open'); });
+});
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+loadState();
+renderDashboard();
+
+// ═══════════════════════════════════════════════════════
+//  SYNCHRONISATION AUTO AVEC candidatures.json
+// ═══════════════════════════════════════════════════════
+
+async function syncFromJSON() {
+  try {
+    const response = await fetch('candidatures.json');
+    const data = await response.json();
+    
+    let state = JSON.parse(localStorage.getItem('alternance_bot') || '{}');
+    
+    const localMap = new Map(state.candidatures?.map(c => [c.email, c]) || []);
+    const jsonCandidatures = data.candidatures || [];
+    
+    jsonCandidatures.forEach(jsonCand => {
+      const local = localMap.get(jsonCand.email);
+      if (local) {
+        if (!local.notes || jsonCand.notes) {
+          local.notes = jsonCand.notes || local.notes;
+        }
+        local.statut = jsonCand.statut;
+        local.reponse = jsonCand.reponse || local.reponse;
+        local.date_envoi = jsonCand.date_envoi;
+        local.date_relance = jsonCand.date_relance;
+        local.erreur = jsonCand.erreur || local.erreur;
+      } else {
+        localMap.set(jsonCand.email, jsonCand);
+      }
+    });
+    
+    state.candidatures = Array.from(localMap.values());
+    localStorage.setItem('alternance_bot', JSON.stringify(state));
+    
+    console.log('✅ ' + state.candidatures.length + ' candidatures synchronisées !');
+    
+    if (typeof renderDashboard === 'function') renderDashboard();
+    if (typeof renderCandidatures === 'function') renderCandidatures();
+    if (typeof renderRelances === 'function') renderRelances();
+    
+    alert('✅ Synchronisation réussie !\n' + state.candidatures.length + ' candidatures importées.');
+
+  } catch (error) {
+    console.error('❌ Erreur:', error);
+    alert('❌ Erreur : Fichier candidatures.json introuvable.\nAssurez-vous d\'avoir lancé sender.py au moins une fois.');
+  }
+}
+
+async function syncFromJSONSilent() {
+  try {
+    const response = await fetch('candidatures.json');
+    const data = await response.json();
+    
+    let state = JSON.parse(localStorage.getItem('alternance_bot') || '{}');
+    const localMap = new Map(state.candidatures?.map(c => [c.email, c]) || []);
+    const jsonCandidatures = data.candidatures || [];
+    
+    let hasChanges = false;
+    
+    jsonCandidatures.forEach(jsonCand => {
+      const local = localMap.get(jsonCand.email);
+      if (local) {
+        if (local.statut !== jsonCand.statut || local.reponse !== jsonCand.reponse) {
+          hasChanges = true;
+        }
+        if (!local.notes || jsonCand.notes) {
+          local.notes = jsonCand.notes || local.notes;
+        }
+        local.statut = jsonCand.statut;
+        local.reponse = jsonCand.reponse || local.reponse;
+        local.date_envoi = jsonCand.date_envoi;
+        local.date_relance = jsonCand.date_relance;
+        local.erreur = jsonCand.erreur || local.erreur;
+      } else {
+        localMap.set(jsonCand.email, jsonCand);
+        hasChanges = true;
+      }
+    });
+    
+    if (hasChanges) {
+      state.candidatures = Array.from(localMap.values());
+      localStorage.setItem('alternance_bot', JSON.stringify(state));
+      
+      if (typeof renderDashboard === 'function') renderDashboard();
+      if (typeof renderCandidatures === 'function') renderCandidatures();
+      if (typeof renderRelances === 'function') renderRelances();
+      
+      console.log('🔄 Données synchronisées automatiquement');
+    }
+  } catch (error) {
+    // Erreur silencieuse
+  }
+}
+
+let autoSyncInterval = null;
+
+function startAutoSync() {
+  if (autoSyncInterval) return;
+  
+  syncFromJSONSilent();
+  
+  autoSyncInterval = setInterval(async () => {
+    if (document.visibilityState === 'visible') {
+      await syncFromJSONSilent();
+    }
+  }, 30000);
+  
+  console.log('✅ Auto-sync activé (toutes les 30s)');
+}
+
+function stopAutoSync() {
+  if (autoSyncInterval) {
+    clearInterval(autoSyncInterval);
+    autoSyncInterval = null;
+    console.log('⏹️ Auto-sync désactivé');
+  }
+}
+
+// Démarrer l'auto-sync
+loadState();
+renderDashboard();
+startAutoSync();
+</script>
+</body>
+</html>
