@@ -4,3 +4,4 @@ google-auth==2.22.0
 google-auth-oauthlib==1.1.0
 python-dotenv==1.1.0
 requests==2.32.0
+gunicorn==22.3.0
